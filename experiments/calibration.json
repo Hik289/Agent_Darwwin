@@ -1,0 +1,47 @@
+{
+  "anchor": "anchor_1",
+  "finalized_at": "2026-06-20T04:18:00+00:00",
+  "machine": "local",
+  "founder_path": "data/founder_genome_v0.json",
+  "tau_v": 0.2,
+  "tau_v_achieved_pass_frac": 0.75,
+  "tau_v_target_pass_frac": 0.7,
+  "founder_fitness": {
+    "planbench_blocksworld": 0.33333333333333337,
+    "planbench_logistics": 0.29333333333333333,
+    "planbench_aggregate": 0.31333333333333335,
+    "locomo_aggregate": 0.16,
+    "locomo_by_category": {
+      "1": {
+        "n": 15,
+        "n_ok": 2
+      },
+      "4": {
+        "n": 5,
+        "n_ok": 3
+      },
+      "2": {
+        "n": 15,
+        "n_ok": 0
+      },
+      "5": {
+        "n": 5,
+        "n_ok": 3
+      },
+      "3": {
+        "n": 10,
+        "n_ok": 0
+      }
+    }
+  },
+  "founder_fitness_std": {
+    "planbench_blocksworld_std": 0.061101009266077866,
+    "planbench_logistics_std": 0.04618802153517007
+  },
+  "cost_per_task_usd": {
+    "planbench_blocksworld": 0.0007,
+    "planbench_logistics": 0.00152,
+    "locomo_with_full_context": 0.00614
+  },
+  "note": "gpt-5.4-mini reasoning model; PlanBench 31.3% baseline accepted per Director B-0 decision; cost_per_task is for founder MAG with verifier.samples=3 + replan_on_failure \u00d7 3 (max_total_steps=12)"
+}

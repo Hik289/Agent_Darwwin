@@ -1,0 +1,209 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentspecies/founder_genome/v0",
+  "genome_version": "0.1.0-founder",
+  "lineage_id": "founder",
+  "parent_ids": [],
+  "_comment": "Founder genome v0 for the agentspecies project. 7-module MAG per AI_Agent_Speciation.md §5.1 / §6.1. All fields are typed and DAG-compatible to support typed subgraph crossover (§5.4). Mutation operators (§5.3) map to specific allowed edits per field — see founder_genome_v0.md §3.",
+
+  "modules": {
+    "planner": {
+      "module_id": "P",
+      "module_type": "planner",
+      "family": "plan_execute",
+      "depth": 4,
+      "replan_on_failure": true,
+      "decomposition_style": "hierarchical",
+      "max_subgoals": 6,
+      "prompt_template_id": "planner_v0_default",
+      "output_ports": {
+        "plan": {
+          "type": "PlanSpec",
+          "schema_ref": "schemas/PlanSpec.v1.json"
+        }
+      },
+      "input_ports": {
+        "goal": {"type": "GoalSpec", "schema_ref": "schemas/GoalSpec.v1.json"},
+        "context": {"type": "EnvContext", "schema_ref": "schemas/EnvContext.v1.json"}
+      },
+      "_mutation_ops": ["replace_module", "modify_param", "modify_tool_interface(out)"]
+    },
+
+    "workflow": {
+      "module_id": "W",
+      "module_type": "workflow",
+      "representation": "typed_dag",
+      "nodes": [
+        {"id": "planner",   "module_ref": "P"},
+        {"id": "retriever", "module_ref": "M"},
+        {"id": "executor",  "module_ref": "T"},
+        {"id": "verifier",  "module_ref": "V"}
+      ],
+      "edges": [
+        {"src": "planner",   "dst": "retriever", "port_src": "plan",        "port_dst": "query"},
+        {"src": "retriever", "dst": "executor",  "port_src": "context",     "port_dst": "context"},
+        {"src": "planner",   "dst": "executor",  "port_src": "plan",        "port_dst": "plan"},
+        {"src": "executor",  "dst": "verifier",  "port_src": "observation", "port_dst": "observation"},
+        {"src": "verifier",  "dst": "executor",  "port_src": "feedback",    "port_dst": "feedback",  "kind": "loop", "max_iters": 3}
+      ],
+      "entry_node": "planner",
+      "exit_node":  "verifier",
+      "_mutation_ops": ["add_workflow_node", "delete_workflow_node", "rewire_workflow_edge"]
+    },
+
+    "memory": {
+      "module_id": "M",
+      "module_type": "memory",
+      "representation": "episodic",
+      "store_backend": "in_process_dict",
+      "retrieval": "hybrid",
+      "retrieval_components": ["bm25", "embedding_cosine"],
+      "embedding_model": "text-embedding-3-small",
+      "top_k": 6,
+      "write_policy": "verified_only",
+      "schema": {
+        "key_type": "episode_id",
+        "value_type": "EpisodeRecord",
+        "fields": ["observation", "action", "outcome", "step", "tags"]
+      },
+      "output_ports": {
+        "context": {"type": "RetrievedContext", "schema_ref": "schemas/RetrievedContext.v1.json"}
+      },
+      "input_ports": {
+        "query": {"type": "RetrieverQuery", "schema_ref": "schemas/RetrieverQuery.v1.json"}
+      },
+      "_mutation_ops": ["replace_module", "modify_memory_schema", "modify_param"]
+    },
+
+    "tools": {
+      "module_id": "T",
+      "module_type": "tool_executor",
+      "enabled": ["search", "python_exec", "file_reader", "web_browser_step", "noop"],
+      "router": "confidence_gated",
+      "router_threshold": 0.55,
+      "tool_specs": {
+        "search":           {"schema_id": "tool.search.v1",     "input": "Query",   "output": "SearchResults"},
+        "python_exec":      {"schema_id": "tool.python.v1",     "input": "Code",    "output": "ExecResult"},
+        "file_reader":      {"schema_id": "tool.file.v1",       "input": "FilePath","output": "FileBytes"},
+        "web_browser_step": {"schema_id": "tool.webnav.v1",     "input": "WebAction","output": "WebObservation"},
+        "noop":             {"schema_id": "tool.noop.v1",       "input": "Unit",    "output": "Unit"}
+      },
+      "max_tool_calls_per_step": 1,
+      "input_ports": {
+        "plan":    {"type": "PlanSpec",        "schema_ref": "schemas/PlanSpec.v1.json"},
+        "context": {"type": "RetrievedContext","schema_ref": "schemas/RetrievedContext.v1.json"},
+        "feedback":{"type": "VerifierFeedback","schema_ref": "schemas/VerifierFeedback.v1.json"}
+      },
+      "output_ports": {
+        "observation": {"type": "ExecObservation", "schema_ref": "schemas/ExecObservation.v1.json"}
+      },
+      "_mutation_ops": ["modify_tool_interface", "modify_param", "replace_module"]
+    },
+
+    "verifier": {
+      "module_id": "V",
+      "module_type": "verifier",
+      "family": "self_consistency",
+      "samples": 3,
+      "voting": "majority",
+      "critic_prompt_template_id": "verifier_v0_default",
+      "stopping_rule": {
+        "type": "score_threshold_or_budget",
+        "score_threshold": 0.7,
+        "max_total_steps": 12
+      },
+      "input_ports": {
+        "observation": {"type": "ExecObservation", "schema_ref": "schemas/ExecObservation.v1.json"}
+      },
+      "output_ports": {
+        "feedback": {"type": "VerifierFeedback",   "schema_ref": "schemas/VerifierFeedback.v1.json"},
+        "final":    {"type": "FinalAnswer",         "schema_ref": "schemas/FinalAnswer.v1.json"}
+      },
+      "_mutation_ops": ["replace_module", "modify_verifier_or_stopping", "modify_param"]
+    },
+
+    "communication": {
+      "module_id": "C",
+      "module_type": "communication",
+      "schema": "claim_evidence_confidence",
+      "message_format": {
+        "fields": ["claim", "evidence", "confidence"],
+        "confidence_range": [0.0, 1.0]
+      },
+      "encoder_id": "comm_encoder_v0_default",
+      "decoder_id": "comm_decoder_v0_default",
+      "_mutation_ops": ["modify_communication_schema", "modify_param"]
+    },
+
+    "update_policy": {
+      "module_id": "U",
+      "module_type": "self_update",
+      "mutation_distribution": {
+        "replace_module":               0.10,
+        "add_workflow_node":            0.05,
+        "delete_workflow_node":         0.05,
+        "rewire_workflow_edge":         0.15,
+        "modify_param":                 0.30,
+        "modify_tool_interface":        0.10,
+        "modify_memory_schema":         0.10,
+        "modify_communication_schema":  0.05,
+        "modify_verifier_or_stopping":  0.10
+      },
+      "mutation_rate_mu": 0.05,
+      "schema_validation": "strict",
+      "type_checking": "strict",
+      "minimal_execution_test": true
+    }
+  },
+
+  "validation_rules": {
+    "module_count": 7,
+    "required_modules": ["planner", "workflow", "memory", "tools", "verifier", "communication", "update_policy"],
+    "interface_typing": "strict_typed_ports",
+    "cross_module_constraints": [
+      "planner.output_ports.plan.type == tools.input_ports.plan.type",
+      "memory.output_ports.context.type == tools.input_ports.context.type",
+      "tools.output_ports.observation.type == verifier.input_ports.observation.type",
+      "verifier.output_ports.feedback.type == tools.input_ports.feedback.type"
+    ],
+    "field_value_ranges": {
+      "planner.depth":              {"type": "int",   "min": 1,   "max": 12},
+      "planner.max_subgoals":       {"type": "int",   "min": 1,   "max": 16},
+      "memory.top_k":               {"type": "int",   "min": 1,   "max": 32},
+      "tools.router_threshold":     {"type": "float", "min": 0.0, "max": 1.0},
+      "tools.max_tool_calls_per_step": {"type": "int","min": 1,   "max": 4},
+      "verifier.samples":           {"type": "int",   "min": 1,   "max": 7},
+      "verifier.stopping_rule.score_threshold":  {"type": "float", "min": 0.0, "max": 1.0},
+      "verifier.stopping_rule.max_total_steps":  {"type": "int",   "min": 1,   "max": 50},
+      "update_policy.mutation_rate_mu": {"type": "float", "min": 0.0, "max": 0.5}
+    },
+    "field_enums": {
+      "planner.family":              ["plan_execute", "react", "tree_of_thought", "lats", "reflexion"],
+      "planner.decomposition_style": ["hierarchical", "flat", "iterative_deepening"],
+      "memory.representation":       ["episodic", "summary", "key_value", "graph", "vector_only"],
+      "memory.retrieval":            ["bm25", "embedding_cosine", "hybrid", "mmr", "none"],
+      "memory.write_policy":         ["always", "verified_only", "high_confidence_only", "never"],
+      "tools.router":                ["confidence_gated", "rule_based", "llm_router", "round_robin"],
+      "verifier.family":             ["self_consistency", "llm_critic", "external_rule", "ensemble"],
+      "verifier.voting":              ["majority", "highest_confidence", "any_positive"],
+      "verifier.stopping_rule.type":  ["score_threshold_or_budget", "fixed_budget", "no_progress"],
+      "communication.schema":         ["claim_evidence_confidence", "natural_language", "structured_json", "minimal"]
+    },
+    "mutation_distribution_sum_must_equal": 1.0
+  },
+
+  "rationale_anchor_1_60pct_planbench": {
+    "_comment": "Why this founder design is expected to clear H0.anchor_1 ≥60% PlanBench success (see founder_genome_v0.md §4).",
+    "design_choices_supporting_60pct": [
+      "planner.family=plan_execute + decomposition_style=hierarchical is the strongest published PlanBench baseline pattern for blocksworld (Valmeekam 2023)",
+      "planner.depth=4 (covers most blocksworld+logistics task with budget margin) ",
+      "planner.replan_on_failure=true (recovers from VAL invalid plans)",
+      "verifier.family=self_consistency,samples=3 gives a 5-10pp boost on PlanBench-style structured output",
+      "verifier.stopping_rule budget 12 steps leaves margin for replanning loops",
+      "tools.enabled includes python_exec to allow simple PDDL reasoning aid (not strictly required for blocksworld but useful for logistics)"
+    ],
+    "expected_success_rate_blocksworld_t1": "0.65 ± 0.06",
+    "expected_success_rate_logistics_t1":  "0.55 ± 0.08",
+    "expected_aggregate_planbench_50task":  "≥ 0.60 (with margin for std)"
+  }
+}

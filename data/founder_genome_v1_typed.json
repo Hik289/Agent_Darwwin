@@ -1,0 +1,466 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agentspecies/founder_genome/v1",
+  "genome_version": "0.1.1-founder-typed",
+  "lineage_id": "founder_typed",
+  "parent_ids": [],
+  "supersedes": "v1",
+  "_comment": "Founder genome v1 \u2014 stripped baseline for cost-constrained LLM evolution. Removes v0 boost stack (replan_on_failure + self_consistency.samples=3 + planner.depth=4) so that single-task LLM cost drops ~3-4\u00d7. Mutation operator set retained from v0 so SAET can rediscover boost when selection favors it. See founder_genome_v1.md for rationale.",
+  "modules": {
+    "planner": {
+      "module_id": "P",
+      "module_type": "planner",
+      "family": "plan_execute",
+      "depth": 1,
+      "replan_on_failure": false,
+      "decomposition_style": "flat",
+      "max_subgoals": 1,
+      "prompt_template_id": "planner_v1_minimal",
+      "output_ports": {
+        "plan": {
+          "type": "PlanSpec",
+          "schema_ref": "schemas/PlanSpec.v1.json"
+        }
+      },
+      "input_ports": {
+        "goal": {
+          "type": "GoalSpec",
+          "schema_ref": "schemas/GoalSpec.v1.json"
+        },
+        "context": {
+          "type": "EnvContext",
+          "schema_ref": "schemas/EnvContext.v1.json"
+        }
+      },
+      "_mutation_ops": [
+        "replace_module",
+        "modify_param",
+        "modify_tool_interface(out)"
+      ],
+      "input_type": "task_spec",
+      "output_type": "plan_v_linear"
+    },
+    "workflow": {
+      "module_id": "W",
+      "module_type": "workflow",
+      "representation": "typed_dag",
+      "nodes": [
+        {
+          "id": "planner",
+          "module_ref": "P"
+        },
+        {
+          "id": "retriever",
+          "module_ref": "M"
+        },
+        {
+          "id": "executor",
+          "module_ref": "T"
+        },
+        {
+          "id": "verifier",
+          "module_ref": "V"
+        }
+      ],
+      "edges": [
+        {
+          "src": "planner",
+          "dst": "retriever",
+          "port_src": "plan",
+          "port_dst": "query"
+        },
+        {
+          "src": "retriever",
+          "dst": "executor",
+          "port_src": "context",
+          "port_dst": "context"
+        },
+        {
+          "src": "planner",
+          "dst": "executor",
+          "port_src": "plan",
+          "port_dst": "plan"
+        },
+        {
+          "src": "executor",
+          "dst": "verifier",
+          "port_src": "observation",
+          "port_dst": "observation"
+        }
+      ],
+      "entry_node": "planner",
+      "exit_node": "verifier",
+      "_comment": "v1 removes the verifier->executor feedback loop edge. Without replan_on_failure + samples=3 the loop is meaningless. Mutation can reintroduce it via add_workflow_edge.",
+      "_mutation_ops": [
+        "add_workflow_node",
+        "delete_workflow_node",
+        "rewire_workflow_edge"
+      ],
+      "input_type": "plan_v_linear",
+      "output_type": "action_seq"
+    },
+    "memory": {
+      "module_id": "M",
+      "module_type": "memory",
+      "representation": "episodic",
+      "store_backend": "in_process_dict",
+      "retrieval": "hybrid",
+      "retrieval_components": [
+        "bm25",
+        "embedding_cosine"
+      ],
+      "embedding_model": "text-embedding-3-small",
+      "top_k": 6,
+      "write_policy": "verified_only",
+      "schema": {
+        "key_type": "episode_id",
+        "value_type": "EpisodeRecord",
+        "fields": [
+          "observation",
+          "action",
+          "outcome",
+          "step",
+          "tags"
+        ]
+      },
+      "output_ports": {
+        "context": {
+          "type": "RetrievedContext",
+          "schema_ref": "schemas/RetrievedContext.v1.json"
+        }
+      },
+      "input_ports": {
+        "query": {
+          "type": "RetrieverQuery",
+          "schema_ref": "schemas/RetrieverQuery.v1.json"
+        }
+      },
+      "_mutation_ops": [
+        "replace_module",
+        "modify_memory_schema",
+        "modify_param"
+      ],
+      "input_type": "action_seq",
+      "output_type": "memory_chunk"
+    },
+    "tools": {
+      "module_id": "T",
+      "module_type": "tool_executor",
+      "enabled": [
+        "search",
+        "python_exec",
+        "file_reader",
+        "web_browser_step",
+        "noop"
+      ],
+      "router": "confidence_gated",
+      "router_threshold": 0.55,
+      "tool_specs": {
+        "search": {
+          "schema_id": "tool.search.v1",
+          "input": "Query",
+          "output": "SearchResults"
+        },
+        "python_exec": {
+          "schema_id": "tool.python.v1",
+          "input": "Code",
+          "output": "ExecResult"
+        },
+        "file_reader": {
+          "schema_id": "tool.file.v1",
+          "input": "FilePath",
+          "output": "FileBytes"
+        },
+        "web_browser_step": {
+          "schema_id": "tool.webnav.v1",
+          "input": "WebAction",
+          "output": "WebObservation"
+        },
+        "noop": {
+          "schema_id": "tool.noop.v1",
+          "input": "Unit",
+          "output": "Unit"
+        }
+      },
+      "max_tool_calls_per_step": 1,
+      "input_ports": {
+        "plan": {
+          "type": "PlanSpec",
+          "schema_ref": "schemas/PlanSpec.v1.json"
+        },
+        "context": {
+          "type": "RetrievedContext",
+          "schema_ref": "schemas/RetrievedContext.v1.json"
+        },
+        "feedback": {
+          "type": "VerifierFeedback",
+          "schema_ref": "schemas/VerifierFeedback.v1.json"
+        }
+      },
+      "output_ports": {
+        "observation": {
+          "type": "ExecObservation",
+          "schema_ref": "schemas/ExecObservation.v1.json"
+        }
+      },
+      "_mutation_ops": [
+        "modify_tool_interface",
+        "modify_param",
+        "replace_module"
+      ],
+      "input_type": "task_spec",
+      "output_type": "tool_result"
+    },
+    "verifier": {
+      "module_id": "V",
+      "module_type": "verifier",
+      "family": "self_consistency",
+      "samples": 1,
+      "voting": "any_valid",
+      "critic_prompt_template_id": "verifier_v1_minimal",
+      "stopping_rule": {
+        "type": "score_threshold_or_budget",
+        "score_threshold": 0.7,
+        "max_total_steps": 4
+      },
+      "input_ports": {
+        "observation": {
+          "type": "ExecObservation",
+          "schema_ref": "schemas/ExecObservation.v1.json"
+        }
+      },
+      "output_ports": {
+        "feedback": {
+          "type": "VerifierFeedback",
+          "schema_ref": "schemas/VerifierFeedback.v1.json"
+        },
+        "final": {
+          "type": "FinalAnswer",
+          "schema_ref": "schemas/FinalAnswer.v1.json"
+        }
+      },
+      "_comment": "v1: samples=1 means there is nothing to vote on; voting=any_valid is a no-op single-sample 'accept if not malformed' rule. max_total_steps lowered 12\u21924 since no replan loop.",
+      "_mutation_ops": [
+        "replace_module",
+        "modify_verifier_or_stopping",
+        "modify_param"
+      ],
+      "input_type": "plan_v_linear",
+      "output_type": "verify_result"
+    },
+    "communication": {
+      "module_id": "C",
+      "module_type": "communication",
+      "schema": "claim_evidence_confidence",
+      "message_format": {
+        "fields": [
+          "claim",
+          "evidence",
+          "confidence"
+        ],
+        "confidence_range": [
+          0.0,
+          1.0
+        ]
+      },
+      "encoder_id": "comm_encoder_v0_default",
+      "decoder_id": "comm_decoder_v0_default",
+      "_mutation_ops": [
+        "modify_communication_schema",
+        "modify_param"
+      ],
+      "input_type": "verify_result",
+      "output_type": "response"
+    },
+    "update_policy": {
+      "module_id": "U",
+      "module_type": "self_update",
+      "mutation_distribution": {
+        "replace_module": 0.084,
+        "add_workflow_node": 0.042,
+        "delete_workflow_node": 0.042,
+        "rewire_workflow_edge": 0.126,
+        "modify_param": 0.252,
+        "modify_tool_interface": 0.084,
+        "modify_memory_schema": 0.084,
+        "modify_communication_schema": 0.042,
+        "modify_verifier_or_stopping": 0.084,
+        "mutate_output_type": 0.08,
+        "mutate_input_type": 0.08
+      },
+      "mutation_rate_mu": 0.05,
+      "schema_validation": "strict",
+      "type_checking": "strict",
+      "minimal_execution_test": true,
+      "input_type": "verify_result",
+      "output_type": "genome_update"
+    }
+  },
+  "validation_rules": {
+    "module_count": 7,
+    "required_modules": [
+      "planner",
+      "workflow",
+      "memory",
+      "tools",
+      "verifier",
+      "communication",
+      "update_policy"
+    ],
+    "interface_typing": "strict_typed_ports",
+    "cross_module_constraints": [
+      "planner.output_ports.plan.type == tools.input_ports.plan.type",
+      "memory.output_ports.context.type == tools.input_ports.context.type",
+      "tools.output_ports.observation.type == verifier.input_ports.observation.type",
+      "verifier.output_ports.feedback.type == tools.input_ports.feedback.type"
+    ],
+    "field_value_ranges": {
+      "planner.depth": {
+        "type": "int",
+        "min": 1,
+        "max": 12
+      },
+      "planner.max_subgoals": {
+        "type": "int",
+        "min": 1,
+        "max": 16
+      },
+      "memory.top_k": {
+        "type": "int",
+        "min": 1,
+        "max": 32
+      },
+      "tools.router_threshold": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0
+      },
+      "tools.max_tool_calls_per_step": {
+        "type": "int",
+        "min": 1,
+        "max": 4
+      },
+      "verifier.samples": {
+        "type": "int",
+        "min": 1,
+        "max": 7
+      },
+      "verifier.stopping_rule.score_threshold": {
+        "type": "float",
+        "min": 0.0,
+        "max": 1.0
+      },
+      "verifier.stopping_rule.max_total_steps": {
+        "type": "int",
+        "min": 1,
+        "max": 50
+      },
+      "update_policy.mutation_rate_mu": {
+        "type": "float",
+        "min": 0.0,
+        "max": 0.5
+      }
+    },
+    "field_enums": {
+      "planner.family": [
+        "plan_execute",
+        "react",
+        "tree_of_thought",
+        "lats",
+        "reflexion"
+      ],
+      "planner.decomposition_style": [
+        "hierarchical",
+        "flat",
+        "iterative_deepening"
+      ],
+      "memory.representation": [
+        "episodic",
+        "summary",
+        "key_value",
+        "graph",
+        "vector_only"
+      ],
+      "memory.retrieval": [
+        "bm25",
+        "embedding_cosine",
+        "hybrid",
+        "mmr",
+        "none"
+      ],
+      "memory.write_policy": [
+        "always",
+        "verified_only",
+        "high_confidence_only",
+        "never"
+      ],
+      "tools.router": [
+        "confidence_gated",
+        "rule_based",
+        "llm_router",
+        "round_robin"
+      ],
+      "verifier.family": [
+        "self_consistency",
+        "llm_critic",
+        "external_rule",
+        "ensemble"
+      ],
+      "verifier.voting": [
+        "majority",
+        "highest_confidence",
+        "any_positive",
+        "any_valid"
+      ],
+      "verifier.stopping_rule.type": [
+        "score_threshold_or_budget",
+        "fixed_budget",
+        "no_progress"
+      ],
+      "communication.schema": [
+        "claim_evidence_confidence",
+        "natural_language",
+        "structured_json",
+        "minimal"
+      ]
+    },
+    "mutation_distribution_sum_must_equal": 1.0
+  },
+  "cost_model": {
+    "lambda_c": 0.5,
+    "lambda_f": 0.5,
+    "lambda_r": 0.2,
+    "c_normalization": {
+      "method": "per_niche_relative_to_v0_p90",
+      "c_max_usd": {
+        "planbench_blocksworld": 0.001,
+        "planbench_logistics": 0.003,
+        "locomo": 0.01,
+        "webarena": 0.02,
+        "swebench_lite": 0.06,
+        "hotpotqa": 0.0003
+      },
+      "_comment": "c_normalized = clip(cost_usd_per_task / c_max, 0, 2). Threshold values are 1.4-1.6\u00d7 founder_v0 measured p90 per niche; chosen so v0 founder sits near c_normalized \u2248 0.7, leaving headroom for mutation to push cost up to ~2\u00d7 before fitness collapses."
+    },
+    "fitness_formula": "F_k(G) = q_ik - lambda_c * c_normalized_ik - lambda_f * f_ik + lambda_r * r_ik"
+  },
+  "expected_baseline_v1": {
+    "_comment": "Predictions to be verified by ml_engineer in anchor_1' (re-run on founder_v1) before LLM Exp 1 launch.",
+    "planbench_blocksworld_success": {
+      "mean": "0.18",
+      "ci": "[0.14, 0.22]"
+    },
+    "planbench_logistics_success": {
+      "mean": "0.15",
+      "ci": "[0.11, 0.20]"
+    },
+    "planbench_aggregate": "~0.17 (vs v0 0.31)",
+    "locomo_aggregate": "~0.09 (vs v0 0.16, mostly single_hop + open_domain hits)",
+    "cost_per_task_usd": {
+      "planbench_blocksworld": "0.00020  (v0 0.00070, 3.5\u00d7)",
+      "planbench_logistics": "0.00040  (v0 0.00152, 3.8\u00d7)",
+      "locomo": "0.00170  (v0 0.00614, 3.6\u00d7)"
+    },
+    "tau_v_v1_predicted": "0.10-0.15 (v0 0.20; lower founder fitness \u2192 lower viability threshold)"
+  }
+}
