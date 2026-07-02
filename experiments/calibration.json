@@ -1,8 +1,8 @@
 {
   "anchor": "anchor_1",
   "finalized_at": "2026-06-20T04:18:00+00:00",
-  "machine": "local",
-  "founder_path": "data/founder_genome_v0.json",
+  "machine": "SERVER_HOSTNAME",
+  "founder_path": "./code/data/founder_genome_v0.json",
   "tau_v": 0.2,
   "tau_v_achieved_pass_frac": 0.75,
   "tau_v_target_pass_frac": 0.7,

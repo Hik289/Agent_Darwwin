@@ -24,7 +24,6 @@ from pathlib import Path
 from typing import Any
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 os.environ.setdefault("OPENAI_API_KEY", "dummy-not-used")
 
@@ -39,8 +38,8 @@ from niches.locomo_eval import evaluate_one as locomo_eval_one, sample_locomo_su
 from niches.hotpotqa_eval import evaluate_one as hotpotqa_eval_one, sample_hotpotqa_subset
 
 
-FOUNDER_V1_PATH = REPO_ROOT / "data" / "founder_genome_v1.json"
-RESULTS_DIR = REPO_ROOT / "results"
+FOUNDER_V1_PATH = Path("./code/data/founder_genome_v1.json")
+RESULTS_DIR = Path("./results")
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 

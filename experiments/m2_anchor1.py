@@ -28,9 +28,9 @@ from pathlib import Path
 from typing import Any
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parent
-if str(HERE) not in sys.path:
-    sys.path.insert(0, str(HERE))
+ROOT = HERE
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 os.environ.setdefault("OPENAI_API_KEY", "dummy-not-used")
 
@@ -43,8 +43,8 @@ from niches.planbench_eval import (  # noqa: E402
 )
 
 # Founder genome
-FOUNDER_PATH = REPO_ROOT / "data" / "founder_genome_v0.json"
-RESULTS_DIR = REPO_ROOT / "results"
+FOUNDER_PATH = Path("./code/data/founder_genome_v0.json")
+RESULTS_DIR = Path("./results")
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -321,7 +321,7 @@ def main():
     # ---- Final report ----
     result = {
         "anchor": "anchor_1",
-        "machine": "local",
+        "machine": "SERVER_HOSTNAME",
         "founder_path": str(FOUNDER_PATH),
         "budget_cap_usd": args.budget,
         "spent_delta_usd": client.total_usd - initial_spend,

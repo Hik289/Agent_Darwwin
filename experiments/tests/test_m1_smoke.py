@@ -1,4 +1,4 @@
-"""Smoke tests that run without LLM calls (pure unit tests for MAG + crossover)."""
+"""M1 smoke tests — run on SERVER_HOSTNAME without LLM calls (pure unit tests for MAG + crossover)."""
 from __future__ import annotations
 
 import json

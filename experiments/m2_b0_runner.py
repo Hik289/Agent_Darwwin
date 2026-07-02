@@ -23,7 +23,6 @@ from pathlib import Path
 from typing import Any
 
 HERE = Path(__file__).resolve().parent
-REPO_ROOT = HERE.parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
@@ -38,8 +37,8 @@ from niches.planbench_eval import (  # noqa: E402
 )
 from niches.locomo_eval import evaluate_one as locomo_eval_one, sample_locomo_subset  # noqa: E402
 
-FOUNDER_PATH = REPO_ROOT / "data" / "founder_genome_v0.json"
-RESULTS_DIR = REPO_ROOT / "results"
+FOUNDER_PATH = Path("./code/data/founder_genome_v0.json")
+RESULTS_DIR = Path("./results")
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
@@ -376,7 +375,7 @@ def main():
     result["elapsed_sec"] = time.time() - t0
     result["spent_delta_usd"] = client.total_usd - initial
     result["budget_cap_usd"] = args.budget
-    result["machine"] = "local"
+    result["machine"] = "SERVER_HOSTNAME"
     result["founder_path"] = str(FOUNDER_PATH)
     _checkpoint_save(out, result)
 

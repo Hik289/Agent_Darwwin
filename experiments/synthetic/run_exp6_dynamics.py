@@ -160,12 +160,7 @@ def compute_rii(rcm, labels):
     labels = np.array(labels)
     species_ids = sorted(set(labels.tolist()))
     if len(species_ids) < 2:
-        return {
-            "rii": 0.0,
-            "K_within": [],
-            "K_within_mean": float(np.diag(rcm).mean()),
-            "K_between_mean": None,
-        }
+        return {"rii": 0.0, "K_within": [], "K_between_mean": None}
     K_within = []
     for s in species_ids:
         idx = labels == s

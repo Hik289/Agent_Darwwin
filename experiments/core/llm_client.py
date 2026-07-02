@@ -1,4 +1,6 @@
-"""Azure/OpenAI-compatible client wrapper with rate-limit backoff + token tracking.
+"""Azure gpt-5.4-mini client wrapper with rate-limit backoff + token tracking.
+
+仅供实验代码使用; 严禁配置进 agent system (per checklist §1.10).
 
 Usage:
     from core.llm_client import LLMClient, BudgetExceeded
@@ -19,10 +21,10 @@ from typing import Any
 from openai import OpenAI
 from openai import APIConnectionError, APIStatusError, APITimeoutError, RateLimitError
 
-# --- Azure/OpenAI-compatible endpoint ---
-AZURE_BASE_URL = os.environ.get("AZURE_ENDPOINT") or os.environ.get("AZURE_BASE_URL")
-AZURE_API_KEY = os.environ.get("AZURE_API_KEY")
-MODEL = os.environ.get("AZURE_MODEL", "gpt-5.4-mini")
+# --- Azure endpoint (per checklist §1.10) ---
+AZURE_BASE_URL = "YOUR_AZURE_ENDPOINT"
+AZURE_API_KEY = "YOUR_AZURE_API_KEY"
+MODEL = "gpt-5.4-mini"
 
 # --- Pricing (USD per 1M token, Azure published rates for gpt-5.4-mini class) ---
 # 来源: niche_profiles.md §0 估算 + EXP_DESIGN.md §6 cost-estimate. 实际跑时第一批 call 会反查正确价。
@@ -81,19 +83,8 @@ class LLMClient:
         tracker_path: str | os.PathLike = "experiments/budget_tracker.json",
         purpose_tag: str = "default",
         max_retries: int = 5,
-        base_url: str | None = None,
-        api_key: str | None = None,
-        model: str | None = None,
     ) -> None:
-        self._base_url = base_url or AZURE_BASE_URL
-        self._api_key = api_key or AZURE_API_KEY
-        self._model = model or MODEL
-        if not self._base_url or not self._api_key:
-            raise ValueError(
-                "Missing LLM endpoint credentials. Set AZURE_ENDPOINT and AZURE_API_KEY, "
-                "or pass base_url= and api_key= to LLMClient()."
-            )
-        self._client = OpenAI(base_url=self._base_url, api_key=self._api_key)
+        self._client = OpenAI(base_url=AZURE_BASE_URL, api_key=AZURE_API_KEY)
         self._budget_cap = float(budget_usd_hard_cap)
         self._tracker_path = Path(tracker_path)
         self._tracker_path.parent.mkdir(parents=True, exist_ok=True)
@@ -158,7 +149,7 @@ class LLMClient:
                 if temperature != 0.0:
                     call_kwargs["temperature"] = temperature
                 resp = self._client.chat.completions.create(
-                    model=self._model,
+                    model=MODEL,
                     messages=messages,
                     **call_kwargs,
                 )

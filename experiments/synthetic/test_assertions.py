@@ -207,7 +207,7 @@ def main() -> int:
     report = {
         "anchor": "anchor_2_and_3",
         "started_at": time.time(),
-        "machine": "local",
+        "machine": "SERVER_HOSTNAME",
         "spec": "data/synthetic_landscape_spec.md §1-§3",
     }
     print("=== M3 + M4: synthetic anchors (no LLM) ===", flush=True)

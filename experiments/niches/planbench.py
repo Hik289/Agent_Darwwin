@@ -1,17 +1,18 @@
-"""PlanBench niche evaluator.
+"""PlanBench niche evaluator (skeleton — M1 deliverable).
 
-Expected local assets:
-  - Locate PlanBench repo + Fast Downward + VAL under data/
+M1 scope:
+  - Locate PlanBench repo + Fast Downward + VAL on SERVER_HOSTNAME
   - Provide list_blocksworld_instances / list_logistics_instances
   - Provide DEFAULT_PILOT_SUBSET (50 task: 25 blocksworld + 25 logistics)
 
-Full agent-based eval runs through the experiment drivers.
+Full agent-based eval runs in M2 (anchor_1) — for now we just verify the harness wires up.
 """
 from __future__ import annotations
 
 import subprocess
 from pathlib import Path
 
+# SERVER_HOSTNAME absolute paths (per niche_profiles.md §2.2)
 PLANBENCH_ROOT = Path("./data/planbench/plan-bench")
 FAST_DOWNWARD = Path("./data/fast_downward")
 VAL_BIN = Path("./data/val/build/linux64/Release/bin")

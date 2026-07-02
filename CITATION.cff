@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper."
+title: "Detectable Reproductive Isolation in LLM Agent Populations Requires Hard Interface Incompatibility"
+authors:
+  - family-names: Authors
+    given-names: Anonymous
+date-released: "2026-07-01"
+url: "https://github.com/Hik289/Agent_Darwwin"
+repository-code: "https://github.com/Hik289/Agent_Darwwin"
+license: MIT
