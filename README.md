@@ -8,15 +8,8 @@ Anonymous Authors
 
 <p>
   <a href="main.pdf"><img alt="Paper PDF" src="https://img.shields.io/badge/Paper-PDF-b31b1b.svg"></a>
-  <a href="https://github.com/Hik289/Agent_Darwwin"><img alt="Code" src="https://img.shields.io/badge/Code-GitHub-black.svg"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="requirements.txt"><img alt="Python" src="https://img.shields.io/badge/Python-3.11%2B-blue.svg"></a>
-</p>
-
-<p>
-  <a href="#synthetic-agent-evolution-testbed"><img alt="SAET" src="https://img.shields.io/badge/SAET-evolutionary_agent_testbed-00a88f.svg"></a>
-  <a href="#reproductive-compatibility-assay"><img alt="RCM/RCC" src="https://img.shields.io/badge/Assay-RCM%20%7C%20RCC%20%7C%20RII-6941c6.svg"></a>
-  <a href="#key-findings"><img alt="Finding" src="https://img.shields.io/badge/Finding-hard_interfaces_required-f59f00.svg"></a>
 </p>
 
 </div>
@@ -36,7 +29,7 @@ The headline result is cautious and mechanistic: ecological specialization can a
 ## Synthetic Agent Evolution Testbed
 
 <p align="center">
-  <img src="assets/figure1_saet_loop.png" alt="SAET evolutionary loop for modular LLM-agent populations." width="96%">
+  <img src="assets/figure1_saet_loop.png" alt="SAET evolutionary loop for modular LLM-agent populations." width="80%">
 </p>
 
 SAET evolves populations of **Modular Agent Genomes (MAGs)** across planning, long-context memory, and retrieval-style niches. It supports mutation, typed subgraph crossover, niche evaluation, parent selection, and explicit reproductive-compatibility measurement.
@@ -44,13 +37,13 @@ SAET evolves populations of **Modular Agent Genomes (MAGs)** across planning, lo
 ## Reproductive Compatibility Assay
 
 <p align="center">
-  <img src="assets/figure2_rcm_construction.png" alt="Reproductive Compatibility Matrix construction from parent pairs, hybrids, viability scores, and RII." width="96%">
+  <img src="assets/figure2_rcm_construction.png" alt="Reproductive Compatibility Matrix construction from parent pairs, hybrids, viability scores, and RII." width="80%">
 </p>
 
 For ordered parent pairs `(i, j)`, the system samples hybrid offspring through typed crossover, evaluates each hybrid, and aggregates viability into a **Reproductive Compatibility Matrix (RCM)**. The **Reproductive Isolation Index (RII)** compares between-lineage compatibility to within-lineage compatibility.
 
 <p align="center">
-  <img src="assets/figure3_rcc_clustering.png" alt="Reproductive Compatibility Clustering pipeline with weighted graph, constrained split, temporal matching, and species call." width="96%">
+  <img src="assets/figure3_rcc_clustering.png" alt="Reproductive Compatibility Clustering pipeline with weighted graph, constrained split, temporal matching, and species call." width="80%">
 </p>
 
 **Reproductive Compatibility Clustering (RCC)** turns the RCM into weighted graphs, searches for clusters with high within-cluster and low between-cluster compatibility, tracks clusters through time, and validates species calls with persistence and niche-distance filters.
