@@ -1,17 +1,15 @@
-<div align="center">
+<h1 align="center">Agent Species</h1>
 
-# Agent Species
+<p align="center">
+  <strong>Detectable Reproductive Isolation in LLM Agent Populations Requires Hard Interface Incompatibility</strong>
+</p>
 
-**Detectable Reproductive Isolation in LLM Agent Populations Requires Hard Interface Incompatibility**
+<p align="center">Anonymous Authors</p>
 
-Anonymous Authors
-
-<p>
+<p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-green.svg" alt="MIT license"></a>
   <a href="requirements.txt"><img src="https://img.shields.io/badge/Python-3.11%2B-3776AB.svg" alt="Python 3.11+"></a>
 </p>
-
-</div>
 
 This repository contains the code release for **Detectable Reproductive Isolation in LLM Agent Populations Requires Hard Interface Incompatibility**. The project asks whether evolving modular LLM-agent populations form species-like reproductive boundaries, measured by the viability of real hybrid offspring rather than by behavior clusters alone.
 
@@ -80,7 +78,9 @@ Agent_Darwwin/
 
 Generated outputs are written to `results/`, `paper/data/`, or local figure folders and are ignored by git.
 
-## Installation
+## Quick Start
+
+### Installation
 
 Use Python 3.11 or newer.
 
