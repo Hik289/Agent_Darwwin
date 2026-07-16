@@ -17,6 +17,12 @@ This repository contains the code release for **Detectable Reproductive Isolatio
 
 The headline result is cautious and mechanistic: ecological specialization can appear without reproductive isolation. Detectable agent "species" emerge only when hard interface incompatibilities make cross-lineage hybrids low-viability.
 
+## At a Glance
+
+- **Research question.** Can evolving LLM-agent populations form species-like boundaries that are detectable through offspring viability?
+- **Core idea.** The code measures reproductive compatibility between modular agents and clusters populations through compatibility graphs.
+- **What is included.** Synthetic evolution experiments, RCC analysis, benchmark adapters, and post-hoc plotting scripts.
+
 ## Key Findings
 
 - **Synthetic EST validation.** Epistatic load predicts hybrid fitness loss with `R^2 = 0.989`, and the critical-complexity scaling law tracks empirical thresholds with `r = 0.985`.
@@ -47,7 +53,7 @@ For ordered parent pairs `(i, j)`, the system samples hybrid offspring through t
 
 **Reproductive Compatibility Clustering (RCC)** turns the RCM into weighted graphs, searches for clusters with high within-cluster and low between-cluster compatibility, tracks clusters through time, and validates species calls with persistence and niche-distance filters.
 
-## Repository Layout
+## Repository Structure
 
 ```text
 Agent_Darwwin/
@@ -203,7 +209,7 @@ python experiments/exp1_cell3_v17.py \
   --progress results/fine_rcc_progress.json
 ```
 
-## Paper Analysis
+## Paper Analysis Scripts
 
 Post-hoc analysis scripts live in [`paper_analysis/`](paper_analysis/). They expect completed result JSON files in `results/` or `paper/data/results_cache/`.
 
