@@ -9,3 +9,25 @@ paper/data/
 paper/figures/
 logs/
 *.log
+
+# Shared research-artifact hygiene
+.AppleDouble
+._*
+.vscode/
+.idea/
+*.swp
+*~
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+env/
+.env.*
+!.env.example
+outputs/
+runs/
+wandb/
+checkpoints/
+*.tmp
