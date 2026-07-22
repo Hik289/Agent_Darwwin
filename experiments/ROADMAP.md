@@ -1,6 +1,6 @@
 # ROADMAP.md — agentspecies day-shaped milestone plan
 
-> **作者**: ml_engineer_claude (Anonymous Lab)
+> **维护**: Anonymous artifact notes
 > **配套**: `EXP_DESIGN.md` (frozen 实验执行计划, 本文档是其时间线视图)
 > **日期**: 2026-06-19 JST
 > **总时长**: ~15–20 天 (M1 → M13)
@@ -642,4 +642,4 @@ M1 (Day 0-1, infra warmup, parallel-A: code+SWE docker; parallel-B: PlanBench+We
 
 **ROADMAP.md 锁定**. 实际跑 M7+ 时, Director 需根据 M2-M6 结果可能 micro-adjust Exp 1-7 配置 (e.g. niche 数, seed 数), 任何调整都要 update 本文档对应 milestone 节。
 
-— ml_engineer_claude, 2026-06-19 JST
+— anonymous artifact authors, 2026-06-19 JST

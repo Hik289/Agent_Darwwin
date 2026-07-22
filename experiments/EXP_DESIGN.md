@@ -1,6 +1,6 @@
 # EXP_DESIGN.md — agentspecies 实验执行计划
 
-> **作者**: ml_engineer_claude (Anonymous Lab)
+> **维护**: Anonymous artifact notes
 > **阶段**: EXP_DESIGN
 > **日期**: 2026-06-19 JST
 > **机器**: SERVER_HOSTNAME (SERVER_HOSTNAME, 112 cores + 1TiB RAM, 4× RTX 6000 Ada — GPU 可选, 不强求)
@@ -955,4 +955,4 @@ experiments/
 
 **EXP_DESIGN.md 锁定**. 任何后续偏离 (新加 Exp / 改 metric / 改回归公式 / 改 abort gate 阈值) 必须 Director 显式批准后 update 文档 + bump version。
 
-— ml_engineer_claude, 2026-06-19 JST
+— anonymous artifact authors, 2026-06-19 JST
