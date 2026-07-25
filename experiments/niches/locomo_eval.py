@@ -107,7 +107,7 @@ def _is_match(pred: str, gold: str | int | float | None, category: int) -> bool:
     g = _normalize(gold_str)
     if not g:
         return False
-    # Fix (Director 2026-06-27 13:08 UTC): reject empty prediction explicitly.
+    # Reject empty predictions explicitly.
     # Without this, "" in any string == True, causing silent false-success when
     # LLM calls fail silently (e.g. BudgetExceeded caught by upstream wrapper).
     if not p:
@@ -146,7 +146,7 @@ def evaluate_one(
     mismatch_mode='hard' (v4): TYPE_MISMATCH → q=0 skip
     mismatch_mode='soft' (v5): TYPE_MISMATCH → continue, mark genome for caller penalty
     """
-    # E1 strict-all-edge check for hybrids (mismatch_mode='rigid', Director 2026-06-26)
+    # Apply the E1 strict all-edge check to hybrids in rigid mode.
     if genome and _saet is not None and mismatch_mode == "rigid" and _saet.is_hybrid(genome):
         ok_strict, fail_reason = _saet.check_strict_interface(genome)
         if not ok_strict:

@@ -30,14 +30,14 @@ import numpy as np
 from core import mag, crossover
 
 
-# H_diag_7 rigid interface check shared utility (Director 2026-06-23 fix)
+# Shared edge set for the H_diag_7 rigid-interface check.
 RIGID_TYPE_EDGES = [
     ('planner', 'workflow'),
     ('verifier', 'communication'),
     ('verifier', 'update_policy'),
 ]
 
-# E1 strict-all-edge check (Director 2026-06-26): adjacent module pairs that have
+# E1 strict-all-edge check: adjacent module pairs that have
 # compatible types in founder_v2_typed. Used when mismatch_mode="rigid" AND agent is
 # cross-lineage hybrid. Only edges with matching pristine types are checked — the
 # others are "structural" (e.g., tools.out=tool_result NOT routed through verifier
@@ -82,7 +82,7 @@ def count_rigid_mismatches(genome):
 
 
 def check_strict_interface(genome):
-    """E1: ALL-edge interface check (Director 2026-06-26).
+    """Run the E1 all-edge interface check.
     Used in mismatch_mode='rigid' when agent is cross-lineage hybrid.
     Return (ok, fail_reason)."""
     modules = genome.get('modules', {})
@@ -239,7 +239,7 @@ def _apply_op(g: dict, op: str, rng: random.Random):
             m = rng.choice(eligible)
             mods[m]["input_type"] = rng.choice(type_opts)
     elif op == "mutate_task_focus":
-        # E2 (Director 2026-06-26): change genome top-level task_focus tag
+        # Mutate the genome's top-level task-focus tag.
         focus_opts = ["none", "planning", "memory", "retrieval"]
         cur = g.get("task_focus", "none")
         choices = [f for f in focus_opts if f != cur]
@@ -445,7 +445,7 @@ def compute_rii(rcm: np.ndarray, labels: list[int]) -> dict[str, Any]:
 
 # ---------------- fitness with λ_c ----------------
 
-# E2 (Director 2026-06-26): niche multiplier (task_focus × niche short key).
+# E2 niche multiplier indexed by task focus and the short niche key.
 # Maps the long niche names used in exp1_cell3 to v3 schema short keys.
 NICHE_SHORT_KEY = {
     "planbench_blocksworld": "planbench",

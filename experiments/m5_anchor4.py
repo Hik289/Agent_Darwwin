@@ -14,7 +14,7 @@ Abort criterion:
   - If at any RCC time-point RII_mean > 0.10, log a warning.
   - If RII > 0.10 persists for ≥ 3 consecutive RCC time-points (3 × 5 = 15 gen),
     flag GA.M5.CRITICAL = TRUE.
-  - Director receives the flag and decides whether to ABORT the entire LLM line.
+  - The caller receives the flag and decides whether to abort the LLM run.
 
 Total expected cost: ~$0.50–$2 (single niche, small N×T, but each LLM call is ~$0.0007).
 With RCM eval R=4 every 5 gens: 4 × 16×17/2 = 544 hybrid evals × 4 RCC time-points = 2176 hybrid

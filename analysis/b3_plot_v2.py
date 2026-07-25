@@ -1,8 +1,8 @@
 """
 B3 Figure 7 v2: Faceted raw pairwise compatibility distributions (Option A).
 
-Director directive 21:08 UTC: original figure had overlapping curves;
-re-paint as multi-panel grid, one run per panel, showing K_within and
+The original figure had overlapping curves, so this version uses a multi-panel
+grid with one run per panel, showing K_within and
 K_between density traces over generations. Clearly distinguishes
 Mechanism A (Exp1.1 high K_w ~0.47, single niche generalist) from
 Mechanism B (other K=1 runs low K_w ~0.10, soft mode floor).
@@ -152,7 +152,7 @@ OUT_NEW = DATA / "figure7_raw_pairwise_v2.png"
 plt.savefig(OUT_NEW, dpi=300, bbox_inches='tight')
 print(f"Wrote {OUT_NEW}")
 
-# Also replace original (as Director requested)
+# Keep the legacy filename used by the paper build.
 OUT_ORIG = DATA / "figure7_raw_pairwise.png"
 plt.savefig(OUT_ORIG, dpi=300, bbox_inches='tight')
 print(f"Wrote {OUT_ORIG}")

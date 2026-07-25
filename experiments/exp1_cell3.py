@@ -1,6 +1,6 @@
 """Exp 1 cell_3 — multi-niche SAET main run.
 
-Per Director Phase 3 directive (Sat 2026-06-20 13:56 UTC + niche availability decision):
+Experiment configuration:
   - N=32, T=50, 1 seed (Anonymous reframe — 1 seed scope)
   - K niches: PlanBench + LoCoMo (+ optional WebArena if docker unblocked + SWE-bench Lite if added)
   - eval_every = 5 gens
@@ -158,7 +158,7 @@ def evaluate_agent_on_niche(genome, niche, llm_client, n_tasks, cost_model, purp
     if _MISMATCH_MODE in ("soft", "rigid") and mm_count > 0:
         q_eff = q_eff * (_SOFT_PENALTY ** mm_count)
         res = dict(res); res["q"] = q_eff; res["_type_mismatch_count"] = mm_count
-    # E2 (Director 2026-06-26): pass genome + niche_multiplier_table to apply task_focus multiplier
+    # Apply the task-focus multiplier associated with this genome and niche.
     fit = saet.fitness_with_cost(q_eff, res["cost_per_task"], niche, cost_model,
                                    genome=genome, niche_multiplier_table=niche_multiplier_table)
     return {**res, **fit, "niche": niche}
@@ -186,7 +186,7 @@ def pair_hybrid_viability(g1, g2, niche, llm_client, R=4, eval_tasks=3,
 
 
 def assign_niches(N, niches, t, m_migration, rng, population=None):
-    """Fix B (Director 2026-06-26 17:10 UTC): task_focus-aware niche assignment.
+    """Assign agents to niches using their declared task focus.
 
     Priority order per agent:
       1. With prob m_migration → random niche (EST §7.5 ecological migration pressure)
@@ -225,8 +225,7 @@ def assign_niches(N, niches, t, m_migration, rng, population=None):
     return out
 
 
-# E2 Fix B (Director 2026-06-26 17:07 UTC): task_focus-aware niche assignment.
-# Specialist agents go to matched niche always; generalists round-robin.
+# Specialists stay in the matching niche; generalists use round-robin assignment.
 TASK_FOCUS_TO_NICHE = {
     "planning": "planbench_blocksworld",
     "memory": "locomo",
@@ -257,7 +256,7 @@ def assign_niches_task_focus(population, niches, m_migration, rng):
 
 
 def niche_bucket_select(combined, niches, N):
-    """Fix B' (Director 2026-06-27 09:28 UTC): per-niche bucketed survivor selection.
+    """Select survivors in per-niche buckets.
 
     combined: list of (agent_dict, fitness, assigned_niche) tuples (population + offspring).
     niches: list of niche names (K=len(niches)).
@@ -325,7 +324,7 @@ def exp1_run(
         cost_model["lambda_c"] = float(lambda_c_override)
         print(f"  lambda_c override: {cost_model['lambda_c']}", flush=True)
 
-    # E2 (Director 2026-06-26): pull niche_multiplier table from v3 genome if present
+    # Read the optional niche-multiplier table from the v3 genome schema.
     nm_block = genome_template.get("niche_multiplier") or {}
     niche_multiplier_table = nm_block.get("multiplier_table")
     if niche_multiplier_table:
@@ -425,9 +424,8 @@ def exp1_run(
             next_id += 1
 
         try:
-            # Fix B' (Director 2026-06-27 09:28 UTC): offspring niche assignment is
-            # task_focus-aware too (was random — bug). Reuse assign_niches_task_focus
-            # if multipliers are active, else round-robin/migration.
+            # Assign offspring by task focus when multipliers are active;
+            # otherwise retain the round-robin/migration policy.
             if niche_multiplier_table is not None:
                 off_assign = assign_niches_task_focus(offspring, niches, m_migration, rng)
             else:
@@ -446,8 +444,8 @@ def exp1_run(
             log["error"] = f"BudgetExceeded at gen {t} offspring: {e}"; break
 
         off_fits = [r["F"] for r in off_eval]
-        # Fix B' (Director 2026-06-27 09:28 UTC): niche-conditional survivor selection.
-        # Without this, global top-K lets one specialist sweep entire population (v10 bug).
+        # Niche-conditional selection prevents one specialist from occupying
+        # the full population under a global top-k rule.
         # Per-niche bucket reserves N/K slots per niche; remainder by global F.
         if niche_multiplier_table is not None:
             combined = list(zip(population, fits, niche_assign)) + list(zip(offspring, off_fits, off_assign))

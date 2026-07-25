@@ -41,7 +41,7 @@ def typed_subgraph_crossover(
     child = mag.syntax_fix(child)
     child = mag.type_check_fix(child)
     # NO semantic_repair() — per EXP_DESIGN §1.2 and EST Thm 2
-    # E2 (Director 2026-06-26): uniform 50/50 inherit top-level task_focus from parents
+    # Inherit the top-level task focus uniformly from either parent.
     if "task_focus" in G_A or "task_focus" in G_B:
         a_focus = G_A.get("task_focus", "none")
         b_focus = G_B.get("task_focus", "none")
@@ -54,7 +54,7 @@ def uniform_genome_crossover(
     G_B: dict[str, Any],
     rng: random.Random | None = None,
 ) -> dict[str, Any]:
-    """Exp 7C uniform crossover variant (Director 2026-06-28 04:23 UTC).
+    """Exp 7C uniform crossover variant.
 
     Per-module 50/50 random inherit from G_A or G_B. Each module's full content
     (input_type, output_type, params, etc.) is taken atomically from one parent.

@@ -102,7 +102,7 @@ def run_founder_on_instance(
     """
     modules = genome["modules"]
 
-    # === E1: STRICT all-edge check for cross-lineage hybrids (Director 2026-06-26) ===
+    # E1: strict all-edge check for cross-lineage hybrids.
     # mode="rigid": if agent is cross-lineage hybrid (lineage_id contains '+'),
     # check ALL adjacent module pair input/output types. Any mismatch → fail.
     # Same-lineage agents bypass strict check (fast path).
@@ -128,7 +128,7 @@ def run_founder_on_instance(
                     chosen_strategy="e1_strict_hybrid_killed",
                 )
 
-    # === H_diag_7 rigid interface check (Director 2026-06-23) ===
+    # H_diag_7 rigid-interface check.
     # mode="hard": Type-mismatch → q=0 skip (v4)
     # mode="soft": Type-mismatch → continue with LLM, count mismatches; caller applies penalty (v5)
     # mode="rigid": E1 above already handled hybrids; here keep soft semantics for non-hybrid

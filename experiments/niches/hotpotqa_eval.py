@@ -110,7 +110,7 @@ def _is_match(pred, gold):
 
 
 def evaluate_one(item, llm_client, genome=None, purpose="hotpotqa", mismatch_mode="hard"):
-    # E1 strict-all-edge check for hybrids (mode='rigid', Director 2026-06-26)
+    # Apply the E1 strict all-edge check to hybrids in rigid mode.
     if genome and _saet is not None and mismatch_mode == "rigid" and _saet.is_hybrid(genome):
         ok_strict, fail_reason = _saet.check_strict_interface(genome)
         if not ok_strict:

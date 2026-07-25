@@ -1,10 +1,10 @@
 """M2 B-0 runner: honest founder calibration.
 
-Per Director B-0 (2026-06-20 03:07 UTC):
+Calibration protocol:
   1. Stage 1: founder on PlanBench BW+LG 50 task × 3 reps → measure baseline (no 60% gate)
   2. Stage 2: 16 founder clone × R=8 self-cross hybrid on 10-task PlanBench BW subset →
      compute viability distribution → τ_v at 70th percentile
-  3. Stage 3 (NEW per Director): LoCoMo 50 conv-subset × 1 rep sanity → does reasoning model
+  3. Stage 3: LoCoMo 50-conversation subset × 1 repetition sanity check: does the reasoning model
      do better on memory QA than on planning?
 
 Budget cap: $25 hard. Wallclock: 6-10h target.
