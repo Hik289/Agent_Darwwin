@@ -15,11 +15,15 @@ This repository contains the code release for **Detectable Reproductive Isolatio
 
 The headline result is cautious and mechanistic: ecological specialization can appear without reproductive isolation. Detectable agent "species" emerge only when hard interface incompatibilities make cross-lineage hybrids low-viability.
 
-## Repository Summary
+## At A Glance
 
-- **Scope.** Can evolving LLM-agent populations form species-like boundaries that are detectable through offspring viability?
-- **Method.** The code measures reproductive compatibility between modular agents and clusters populations through compatibility graphs.
-- **Contents.** Synthetic evolution experiments, RCC analysis, benchmark adapters, and post-hoc plotting scripts.
+| Artifact review question | Entry point |
+| --- | --- |
+| Research question | Can evolving LLM-agent populations form species-like boundaries that are detectable through offspring viability? |
+| Core method | The code measures reproductive compatibility between modular agents and clusters populations through compatibility graphs. |
+| Included artifacts | Synthetic evolution experiments, RCC analysis, benchmark adapters, and post-hoc plotting scripts. |
+| Fast validation | `python -m pytest experiments/tests -q` |
+| Paper-scale reproduction | Synthetic validation scripts in `experiments/synthetic/`, followed by the LLM-agent runs described below. |
 
 ## Key Findings
 
@@ -94,7 +98,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-The synthetic experiments run locally. The LLM-agent experiments additionally require an OpenAI-compatible Azure endpoint and external benchmark assets.
+The synthetic experiments run locally. The LLM-agent experiments additionally require an OpenAI-compatible chat-completions endpoint and external benchmark assets.
 
 ## API Configuration
 
@@ -115,9 +119,9 @@ set +a
 Required variables:
 
 ```bash
-AZURE_ENDPOINT=https://YOUR_RESOURCE.openai.azure.com/openai/v1
-AZURE_API_KEY=YOUR_AZURE_API_KEY
-AZURE_MODEL=gpt-5.4-mini
+LLM_API_BASE_URL=https://YOUR_ENDPOINT.example/v1
+LLM_API_KEY=YOUR_API_KEY
+LLM_MODEL=YOUR_MODEL_NAME
 ```
 
 The client reads these variables in [`experiments/core/llm_client.py`](experiments/core/llm_client.py). Using another OpenAI-compatible model should be treated as a new experimental condition.
