@@ -341,17 +341,6 @@ def exp1_run(
     rng = random.Random(seed)
     population = []
     if hand_seed:
-        # Hand-seeded configuration used for the v17 existence proof:
-        # 3 lineages × N/3 agents each. Each lineage has distinct planner.output_type
-        # AND workflow.input_type so within-lineage agents pass RIGID interface check
-        # (planner.out == workflow.in), but cross-lineage hybrids fail (planner.out
-        # from lineage A != workflow.in from lineage B) → rigid mode q=0.
-        #
-        # task_focus per lineage matches its preferred niche (×10/×30/×15 mult).
-        # v17.1 (2026-06-27 23:16 UTC): ALL 7 STRICT_TYPE_EDGES need lineage-specific
-        # types. Single-edge override (v17.0) only blocked ~30% of cross-lineage crossovers
-        # because typed_subgraph_crossover bias inherits planner+workflow as same subgraph
-        # 71% of the time. Solution: apply lineage suffix to every edge endpoint.
         import copy
         # v17.2 supports either two or three lineages.
         # Lineages match niches in order: niche[0]→LA→planning, niche[1]→LB→memory, niche[2]→LC→retrieval
