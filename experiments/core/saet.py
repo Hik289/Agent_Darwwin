@@ -37,13 +37,6 @@ RIGID_TYPE_EDGES = [
     ('verifier', 'update_policy'),
 ]
 
-# E1 strict-all-edge check: adjacent module pairs that have
-# compatible types in founder_v2_typed. Used when mismatch_mode="rigid" AND agent is
-# cross-lineage hybrid. Only edges with matching pristine types are checked — the
-# others are "structural" (e.g., tools.out=tool_result NOT routed through verifier
-# directly) and would always fail.
-#
-# Verified against pristine founder_v2_typed (all 7 edges below pass):
 STRICT_TYPE_EDGES = [
     ('planner', 'workflow'),                # plan_v_linear
     ('workflow', 'memory'),                 # action_seq

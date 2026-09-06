@@ -246,12 +246,6 @@ def main() -> int:
     print(plot, flush=True)
     report["ascii_plot"] = plot
 
-    # ---- L_c theoretical ----
-    # Use M2 calibration outputs: tau_v=0.20, founder F_bar ≈ 0.31 (PlanBench aggregate)
-    # delta_bar = 0.10 (M-family default), p_min = 0.5
-    # alpha = ? In M-family with fixed L, slope = p_min * delta_bar, so we can't directly read α.
-    # For L_c, we need α from L-sweep (Thm 4 needs ∂M/∂L² ~ α). Without that, we report
-    # a *placeholder* L_c using a literature-default α = 0.1 (Orr 1995 range).
     alpha_placeholder = 0.1
     tau_v = 0.20
     F_bar = 0.31
